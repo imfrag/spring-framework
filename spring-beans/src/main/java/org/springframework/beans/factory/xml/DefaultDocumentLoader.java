@@ -64,16 +64,24 @@ public class DefaultDocumentLoader implements DocumentLoader {
 	/**
 	 * Load the {@link Document} at the supplied {@link InputSource} using the standard JAXP-configured
 	 * XML parser.
+	 * @param inputSource Resource资源
+	 * @param entityResolver 解析器，其作用是定义如何定位验证文件的逻辑 todo-frag EntityResolver
+	 * @param errorHandler 处理加载Document过程的错误
+	 * @param validationMode 验证模式
+	 * @param namespaceAware 命名空间支持，初始默认为false
 	 */
 	@Override
 	public Document loadDocument(InputSource inputSource, EntityResolver entityResolver,
 			ErrorHandler errorHandler, int validationMode, boolean namespaceAware) throws Exception {
 
+		// 1. 创建Document建造者工厂实例（其中如果验证模式为XSD，则namespaceAware强制为true）
 		DocumentBuilderFactory factory = createDocumentBuilderFactory(validationMode, namespaceAware);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Using JAXP provider [" + factory.getClass().getName() + "]");
 		}
+		// 2. 获取Document建造者实例
 		DocumentBuilder builder = createDocumentBuilder(factory, entityResolver, errorHandler);
+		// 3. 解析并获取Document实例
 		return builder.parse(inputSource);
 	}
 

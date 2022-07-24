@@ -82,6 +82,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * @see #setEnvironment
 	 */
 	protected AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		// 这里registry默认传入的是DefaultListableBeanFactory类型
+		// DefaultListableBeanFactory实现了BeanDefinitionRegistry接口
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
 
@@ -219,6 +221,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource[])
 	 */
 	public int loadBeanDefinitions(String location, @Nullable Set<Resource> actualResources) throws BeanDefinitionStoreException {
+		// 获取ResourceLoader
 		ResourceLoader resourceLoader = getResourceLoader();
 		if (resourceLoader == null) {
 			throw new BeanDefinitionStoreException(
@@ -228,9 +231,12 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		if (resourceLoader instanceof ResourcePatternResolver) {
 			// Resource pattern matching available.
 			try {
+				// 获取Resource集合
 				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+				// 递归调用加载Resource
 				int count = loadBeanDefinitions(resources);
 				if (actualResources != null) {
+					// 将加载外部的Resource添加进actualResources中
 					Collections.addAll(actualResources, resources);
 				}
 				if (logger.isTraceEnabled()) {
@@ -245,6 +251,7 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		}
 		else {
 			// Can only load single resources by absolute URL.
+			// ResourceLoader为DefaultResourceLoader类或其子类，则只能基于location获取单个Resource
 			Resource resource = resourceLoader.getResource(location);
 			int count = loadBeanDefinitions(resource);
 			if (actualResources != null) {

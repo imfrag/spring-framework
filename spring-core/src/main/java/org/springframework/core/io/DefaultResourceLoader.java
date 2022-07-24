@@ -144,8 +144,13 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 	@Override
 	public Resource getResource(String location) {
+		// DefaultResourceLoader负责加载Resource核心实现
 		Assert.notNull(location, "Location must not be null");
 
+		/**
+		 * 用户可以通过实现ProtocolResolver接口自定义协议资源解析类
+		 * 并使用DefaultResourceLoader.addProtocolResolver加载自定义协议资源解析类
+		 */
 		for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
@@ -153,19 +158,32 @@ public class DefaultResourceLoader implements ResourceLoader {
 			}
 		}
 
+		/**
+		 * 对于用户传入D:/.../.../...这种类型的资源路径
+		 * 1.不以"/"开头
+		 * 2.不以"classpath:"开头
+		 * 3.不以"file:"或其他协议开头
+		 * 因此最后将该路径解析为ClassPathContextResource类型（可以使用FileSystemResourceLoader，重写getResourceByPath方法）
+		 */
+
+		// 加载ClassPathContextResource实例
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
 		}
+		// 加载ClassPathResource实例
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
 			try {
 				// Try to parse the location as a URL...
+				// 将用户传入的location字符串封装为url
 				URL url = new URL(location);
+				// 根据url协议类型判断返回FileUrlResource或UrlResource
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
 			catch (MalformedURLException ex) {
+				// 当上述类型都无法加载时，默认使用ClassPathContextResource加载
 				// No URL -> resolve as resource path.
 				return getResourceByPath(location);
 			}

@@ -94,25 +94,34 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
+		// 单例模式，且缓存中存在
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
+				// 再次验证缓存中是否存在beanName对应的bean
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
+					// 通过FactoryBean获取bean
 					object = doGetObjectFromFactoryBean(factory, beanName);
 					// Only post-process and store if not put there already during getObject() call above
 					// (e.g. because of circular reference processing triggered by custom getBean calls)
+					// 从缓存中获取bean
 					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
 					if (alreadyThere != null) {
 						object = alreadyThere;
 					}
 					else {
 						if (shouldPostProcess) {
+							// 若bean在创建中，则直接返回
 							if (isSingletonCurrentlyInCreation(beanName)) {
 								// Temporarily return non-post-processed object, not storing it yet..
 								return object;
 							}
+							// 创建前置处理
+							// !this.inCreationCheckExclusions.contains(beanName)
+							// && !this.singletonsCurrentlyInCreation.add(beanName)
 							beforeSingletonCreation(beanName);
 							try {
+								// 从FactoryBean获取bean后的处理
 								object = postProcessObjectFromFactoryBean(object, beanName);
 							}
 							catch (Throwable ex) {
@@ -120,9 +129,13 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 										"Post-processing of FactoryBean's singleton object failed", ex);
 							}
 							finally {
+								// 创建后置处理
+								// !this.inCreationCheckExclusions.contains(beanName)
+								// && !this.singletonsCurrentlyInCreation.remove(beanName)
 								afterSingletonCreation(beanName);
 							}
 						}
+						// 放入缓存中
 						if (containsSingleton(beanName)) {
 							this.factoryBeanObjectCache.put(beanName, object);
 						}

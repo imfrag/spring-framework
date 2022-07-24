@@ -401,7 +401,9 @@ class ConstructorResolver {
 		Class<?> factoryClass;
 		boolean isStatic;
 
+		// 获取FactoryBean名称
 		String factoryBeanName = mbd.getFactoryBeanName();
+		// 使用FactoryBean
 		if (factoryBeanName != null) {
 			if (factoryBeanName.equals(beanName)) {
 				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
