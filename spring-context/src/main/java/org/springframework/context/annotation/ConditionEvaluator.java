@@ -78,21 +78,28 @@ class ConditionEvaluator {
 	 * @return if the item should be skipped
 	 */
 	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+		// metadata为空，或metadata封装的类没有声明@Conditional注解
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			return false;
 		}
 
 		if (phase == null) {
+			// metadata封装的类是配置类（非接口 & （@ComponentScan等注解 | @Bean注解方法）
 			if (metadata instanceof AnnotationMetadata &&
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
+				// 解析配置类时校验@Conditional注解，如果@Conditional返回false，则不注册该配置类
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
 			}
+			// 注册非配置类，不影响配置类注册
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
 		}
 
+		// phase为PARSE_CONFIGURATION 或 REGISTER_BEAN
 		List<Condition> conditions = new ArrayList<>();
+		// 获取@Conditional配置的类名集合
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
 			for (String conditionClass : conditionClasses) {
+				// 获取Condition接口实现类的实例
 				Condition condition = getCondition(conditionClass, this.context.getClassLoader());
 				conditions.add(condition);
 			}

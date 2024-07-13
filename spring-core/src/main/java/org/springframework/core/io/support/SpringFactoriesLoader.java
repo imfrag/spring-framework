@@ -140,6 +140,7 @@ public final class SpringFactoriesLoader {
 
 		result = new HashMap<>();
 		try {
+			// FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories"
 			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();

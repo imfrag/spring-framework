@@ -87,11 +87,18 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			synchronized (this) {
 				aspectNames = this.aspectBeanNames;
 				if (aspectNames == null) {
+
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					// 返回所有beanName集合
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {
+						/**
+						 * BeanFactoryAspectJAdvisorsBuilder实现默认返回true
+						 * BeanFactoryAspectJAdvisorsBuilderAdaptor委派AnnotationAwareAspectJAutoProxyCreator，如果未申明aop:include，则返回true；否则基于aop:include规则判断
+						 * （通常不指定include，则默认返回true）
+						 */
 						if (!isEligibleBean(beanName)) {
 							continue;
 						}
@@ -101,13 +108,32 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
+
+						/**
+						 * 类声明了@Aspect注解 && 类声明属性名没有"ajc$"开头
+						 * todo: ajc$
+						 */
 						if (this.advisorFactory.isAspect(beanType)) {
+							// 缓存切面beanName
 							aspectNames.add(beanName);
+
+							/**
+							 * 定义了beanType的封装类型AjType，提供了reflect和Class常用方法，还提供了AOP常见的操作（切面、切点等）
+							 */
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
+							/**
+							 * todo: 切面实例策略，默认为单例
+							 */
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
+								// 切面工厂实例
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
+
+								/**
+								 * 1. 切面Bean为单例，切缓存当前切面的Advisor实例
+								 * 2. 切面bean非单例，保存工厂，即每个bean生成代理对象时使用不同的切面实例
+								 */
 								if (this.beanFactory.isSingleton(beanName)) {
 									this.advisorsCache.put(beanName, classAdvisors);
 								}

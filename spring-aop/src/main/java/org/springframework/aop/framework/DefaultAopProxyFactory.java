@@ -54,6 +54,12 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+		/**
+		 * NativeDetector.inNativeImage()			判断程序是否运行在GraalVM上，如果是，只能使用JDK动态代理
+		 * config.isOptimize()						配置优化代理，默认为false
+		 * config.isProxyTargetClass()				是否对类进行代理（CGLIB），为true时，即使类实现了接口，依然使用CGLIB动态代理，对应proxy-target-class配置
+		 * hasNoUserSuppliedProxyInterfaces(config)	代理接口
+		 */
 		if (!NativeDetector.inNativeImage() &&
 				(config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
 			Class<?> targetClass = config.getTargetClass();

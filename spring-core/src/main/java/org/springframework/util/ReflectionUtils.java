@@ -358,6 +358,7 @@ public abstract class ReflectionUtils {
 			// nothing to introspect
 			return;
 		}
+		// 获取切面类声明的方法
 		Method[] methods = getDeclaredMethods(clazz, false);
 		for (Method method : methods) {
 			if (mf != null && !mf.matches(method)) {
@@ -371,6 +372,10 @@ public abstract class ReflectionUtils {
 			}
 		}
 		// Keep backing up the inheritance hierarchy.
+		/**
+		 * 1. 父类不为空，递归处理非Object父类声明的方法
+		 * 2. 当前类为接口，
+		 */
 		if (clazz.getSuperclass() != null && (mf != USER_DECLARED_METHODS || clazz.getSuperclass() != Object.class)) {
 			doWithMethods(clazz.getSuperclass(), mc, mf);
 		}

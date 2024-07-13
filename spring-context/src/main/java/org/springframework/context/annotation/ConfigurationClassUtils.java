@@ -91,6 +91,7 @@ abstract class ConfigurationClassUtils {
 		}
 
 		AnnotationMetadata metadata;
+		// AnnotatedBeanDefinition接口表示无需加载该类的.class文件，即可获取其元数据信息，如注解等
 		if (beanDef instanceof AnnotatedBeanDefinition &&
 				className.equals(((AnnotatedBeanDefinition) beanDef).getMetadata().getClassName())) {
 			// Can reuse the pre-parsed metadata from the given BeanDefinition...
@@ -151,17 +152,20 @@ abstract class ConfigurationClassUtils {
 	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
 		// Do not consider an interface or an annotation...
+		// 候选配置类不能是接口
 		if (metadata.isInterface()) {
 			return false;
 		}
 
 		// Any of the typical annotations found?
+		// 候选配置类可能实现@Component, @ComponentScan, @Import, @ImportSource
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
 			}
 		}
 
+		// 候选配置类内部有@Bean声明的方法
 		// Finally, let's look for @Bean methods...
 		return hasBeanMethods(metadata);
 	}

@@ -214,7 +214,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			processBeanDefinition(ele, delegate);
 		}
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
-			// recurse
+			// recurse（递归调用，解析<beans/>标签）
 			doRegisterBeanDefinitions(ele);
 		}
 	}
@@ -338,7 +338,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// 1. 解析bean节点，成功返回BeanDefinitionHolder；否则返回null
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
-			// 2. 解析自定义标签
+			// 2. 解析自定义属性标签
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.

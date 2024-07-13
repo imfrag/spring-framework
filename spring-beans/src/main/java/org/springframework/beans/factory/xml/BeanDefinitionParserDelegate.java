@@ -441,6 +441,7 @@ public class BeanDefinitionParserDelegate {
 
 		// 解析属性，构造AbstractBeanDefinition实例
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
+
 		if (beanDefinition != null) {
 			// beanName为空时，使用工具类生成唯一BeanName
 			if (!StringUtils.hasText(beanName)) {
@@ -535,6 +536,7 @@ public class BeanDefinitionParserDelegate {
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
 			// ******************************************************************************************
+			// 解析<bean/>元素的子节点
 
 			// 解析meta子节点，并添加到BeanDefinition的attributes字段中
 			parseMetaElements(ele, bd);
@@ -799,7 +801,9 @@ public class BeanDefinitionParserDelegate {
 			Node node = nl.item(i);
 			if (isCandidateElement(node) && nodeNameEquals(node, REPLACED_METHOD_ELEMENT)) {
 				Element replacedMethodEle = (Element) node;
+				// 被替换的方法名
 				String name = replacedMethodEle.getAttribute(NAME_ATTRIBUTE);
+				// 实现MethodPlacer的BeanName
 				String callback = replacedMethodEle.getAttribute(REPLACER_ATTRIBUTE);
 				ReplaceOverride replaceOverride = new ReplaceOverride(name, callback);
 				// Look for arg-type match elements.

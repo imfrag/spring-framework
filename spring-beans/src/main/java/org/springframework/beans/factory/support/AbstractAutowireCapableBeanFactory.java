@@ -541,9 +541,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			/**
 			 * 3. 实例化的前置处理
-			 * 给BeanPostProcessor一个机会用来返回一个目标bean的代理类
-			 * （实现AOP）
-			 * todo-frag:aop入口
+			 * 当且仅当为beanName配置了TargetSource时，才会给BeanPostProcessor一个机会用来返回一个目标bean的代理类（实现AOP）
 			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -1254,6 +1252,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
 
+		// 3. 如果缓存中存在构造函数，则使用匹配的构造函数初始化 *******************************************************
+
 		// Shortcut when re-creating the same bean...
 		boolean resolved = false;
 		boolean autowireNecessary = false;
@@ -1267,8 +1267,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 		}
-
-		// 3. 如果缓存中存在构造函数，则使用匹配的构造函数初始化 *******************************************************
 
 		if (resolved) {
 			// autowire自动注入，调用构造函数自动注入

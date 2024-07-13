@@ -259,6 +259,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// 1. 从缓存中或实例工厂中获取bean对象（可能不完整）
 		Object sharedInstance = getSingleton(beanName);
 
+		// args != null时，通常是通过get(beanName, args)第一次创建Bean实例
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
 				if (isSingletonCurrentlyInCreation(beanName)) {
@@ -1896,7 +1897,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
-		// 传入name对应FactoryBean，以&开头
+		// 传入name对应FactoryBean，以&开头，即FactoryBean实例
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
 				return beanInstance;
@@ -1909,6 +1910,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (mbd != null) {
 				mbd.isFactoryBean = true;
 			}
+			// 返回FactoryBean自身
 			return beanInstance;
 		}
 
@@ -1920,7 +1922,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return beanInstance;
 		}
 
-		// beanInstance是FactoryBean实例
+		// beanInstance是FactoryBean实例通过getObject返回的Bean
 		Object object = null;
 		if (mbd != null) {
 			mbd.isFactoryBean = true;
